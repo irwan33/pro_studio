@@ -1,0 +1,1 @@
+import { ok } from "@/lib/api/response"; export async function PUT() { return ok({ saved: true }); }

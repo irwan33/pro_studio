@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { handleApiError, ok } from "@/lib/api/response";
+export async function GET(_: Request, { params }: { params: Promise<{ token: string }> }) { try { const link = await prisma.shareLink.findUnique({ where: { token: (await params).token }, include: { project: true } }); if (!link) throw new Error("NOT_FOUND"); return ok(link.project); } catch (e) { return handleApiError(e); } }

@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) { try { const user = await requireUser(); const { id } = await params; const p = await prisma.project.findFirst({ where: { id, userId: user.id } }); if (!p) throw new Error("NOT_FOUND"); return ok(await prisma.project.update({ where: { id }, data: { isFavorite: !p.isFavorite } })); } catch (e) { return handleApiError(e); } }

@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  DESIGNER
+  ADMIN
+}
+enum ProjectStatus {
+  ACTIVE
+  TRASHED
+  ARCHIVED
+}
+enum AssetType {
+  IMAGE
+  VIDEO
+  LOGO
+  SVG
+  BACKGROUND
+  ELEMENT
+}
+enum SharePermission {
+  VIEW
+  EDIT
+}
+enum ExportFormat {
+  PNG
+  JPG
+  SVG
+  PDF
+}
+enum ExportStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  avatarUrl    String?
+  role         Role           @default(USER)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+  projects     Project[]
+  templates    Template[]
+  assets       Asset[]
+  brandKits    BrandKit[]
+  exportJobs   ExportJob[]
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  userId       String
+  title        String
+  slug         String        @unique
+  width        Int
+  height       Int
+  sceneJson    Json
+  thumbnailUrl String?
+  status       ProjectStatus @default(ACTIVE)
+  isFavorite   Boolean       @default(false)
+  lastSavedAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets       ProjectAsset[]
+  shareLinks   ShareLink[]
+  exportJobs   ExportJob[]
+  @@index([userId, status, updatedAt])
+}
+
+model Template {
+  id           String   @id @default(cuid())
+  createdById  String?
+  name         String
+  slug         String   @unique
+  description  String
+  category     String
+  sportType    String
+  width        Int
+  height       Int
+  sceneJson    Json
+  thumbnailUrl String
+  isPremium    Boolean  @default(false)
+  isPublished  Boolean  @default(false)
+  tags         String[] @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  @@index([category, sportType, isPublished])
+}
+
+model Asset {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String
+  type         AssetType
+  mimeType     String
+  url          String
+  thumbnailUrl String?
+  width        Int?
+  height       Int?
+  fileSize     Int
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects     ProjectAsset[]
+  brandAssets  BrandAsset[]
+  @@index([userId, type])
+}
+
+model ProjectAsset {
+  projectId String
+  assetId   String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  asset     Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  @@id([projectId, assetId])
+}
+
+model ShareLink {
+  id         String          @id @default(cuid())
+  projectId  String
+  token      String          @unique
+  permission SharePermission @default(VIEW)
+  expiresAt  DateTime?
+  createdAt  DateTime        @default(now())
+  project    Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  @@index([projectId])
+}
+
+model BrandKit {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  colors    Json
+  fonts     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets    BrandAsset[]
+}
+
+model BrandAsset {
+  id         String   @id @default(cuid())
+  brandKitId String
+  assetId    String
+  category   String
+  brandKit   BrandKit @relation(fields: [brandKitId], references: [id], onDelete: Cascade)
+  asset      Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
+
+model ExportJob {
+  id           String       @id @default(cuid())
+  projectId    String
+  userId       String
+  format       ExportFormat
+  resolution   String
+  status       ExportStatus @default(QUEUED)
+  outputUrl    String?
+  errorMessage String?
+  createdAt    DateTime     @default(now())
+  completedAt  DateTime?
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, status, createdAt])
+}

@@ -10,3 +10,4 @@ storage/uploads/*
 .vercel
 .env*
 prompt/
+.DS_Store

@@ -1,0 +1,1 @@
+export default function AdminExportsPage() { return <main className="min-h-screen bg-studio-bg p-8"><h1 className="font-display text-3xl">Export jobs</h1></main>; }

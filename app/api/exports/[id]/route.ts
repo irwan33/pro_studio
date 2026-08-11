@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) { try { const user = await requireUser(); const job = await prisma.exportJob.findFirst({ where: { id: (await params).id, userId: user.id } }); if (!job) throw new Error("NOT_FOUND"); return ok(job); } catch (e) { return handleApiError(e); } }

@@ -1,0 +1,1 @@
+export default function AdminAssetsPage() { return <main className="min-h-screen bg-studio-bg p-8"><h1 className="font-display text-3xl">Assets</h1></main>; }

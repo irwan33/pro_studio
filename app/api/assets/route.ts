@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function GET() { try { const user = await requireUser(); return ok(await prisma.asset.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } })); } catch (e) { return handleApiError(e); } }

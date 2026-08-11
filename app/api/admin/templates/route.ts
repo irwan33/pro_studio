@@ -1,0 +1,1 @@
+import { prisma } from "@/lib/db"; import { requireAdmin } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response"; export async function GET() { try { await requireAdmin(); return ok(await prisma.template.findMany()); } catch (e) { return handleApiError(e); } }

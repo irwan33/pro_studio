@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) { try { const user = await requireUser(); const { id } = await params; return ok(await prisma.project.update({ where: { id, userId: user.id }, data: { deletedAt: null, status: "ACTIVE" } })); } catch (e) { return handleApiError(e); } }

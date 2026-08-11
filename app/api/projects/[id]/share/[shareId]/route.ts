@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string; shareId: string }> }) { try { await requireUser(); const { shareId } = await params; return ok(await prisma.shareLink.delete({ where: { id: shareId } })); } catch (e) { return handleApiError(e); } }

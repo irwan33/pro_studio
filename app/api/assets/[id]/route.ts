@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db"; import { requireUser } from "@/lib/auth/session"; import { handleApiError, ok } from "@/lib/api/response";
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) { try { const user = await requireUser(); const body = await req.json(); return ok(await prisma.asset.update({ where: { id: (await params).id, userId: user.id }, data: { name: body.name } })); } catch (e) { return handleApiError(e); } }
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) { try { const user = await requireUser(); return ok(await prisma.asset.delete({ where: { id: (await params).id, userId: user.id } })); } catch (e) { return handleApiError(e); } }
