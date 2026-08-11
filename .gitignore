@@ -1,0 +1,12 @@
+.next
+node_modules
+dist
+coverage
+playwright-report
+test-results
+.env
+storage/uploads/*
+!storage/uploads/.gitkeep
+.vercel
+.env*
+prompt/
